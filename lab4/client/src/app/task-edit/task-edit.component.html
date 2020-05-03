@@ -1,0 +1,57 @@
+<div class="container border border-success rounded p-2 my-2" *ngIf="showEditPanel"
+>
+  <form (ngSubmit)="onSubmit()" #taskForm="ngForm" class="m-2">
+    <div class="form-group">
+      <label for="title" id="titleLable">Описание задачи</label>
+      <input type="text" class="form-control" id="title" aria-describedby="titleLable" minlength="1" required [(ngModel)]="task.title" name="title" #title="ngModel"/>
+      <div *ngIf="title.invalid && (title.dirty || title.touched)" class="alert alert-danger">
+        <div *ngIf="title.errors.required">Описание задачи обязательно</div>
+        <div *ngIf="title.errors.minlength">Длина задача должна быть боле 1 символа</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="date" id="dateLable">Дата завершения</label>
+      <input type="date" class="form-control" id="dueDate" aria-describedby="dateLable" required [ngModel]="task.dueDate | date: 'yyyy-MM-dd'" (ngModelChange)="task.dueDate = $event" name="dueDate" #dueDate="ngModel"/>
+      <div *ngIf="dueDate.invalid && (dueDate.dirty || dueDate.touched)" class="alert alert-danger">
+        <div *ngIf="dueDate.errors.required">Дата завершения обязательна</div>
+      </div>
+    </div>
+    <fieldset class="form-group">
+      <div class="row" style="display: none">
+        <legend class="col-form-label col-sm-2 pt-0">Завершено</legend>
+        <div class="col-sm-10">
+          <div class="form-check custom-control custom-checkbox">
+            <input class="custom-control-input" type="radio" name="completedRadios" id="falseRadio" [value]="false" [(ngModel)]="task.completed"/>
+            <label class="custom-control-label" for="falseRadio">false</label>
+          </div>
+          <div class="form-check custom-control custom-checkbox">
+            <input class="custom-control-input" type="radio" name="completedRadios" id="trueRadio" [value]="true" [(ngModel)]="task.completed"/>
+            <label class="custom-control-label" for="trueRadio">true</label>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <div class="form-group">
+      <div class="custom-file">
+        <input type="file" class="custom-file-input" id="attachedFile"  name="attachedFile" (change)="onFileChange($event)"/>
+        <label id="fileLabel" for="attachedFile" class="custom-file-label">{{
+          attachedFile ? attachedFile.name : "Выбрать файл"
+        }}</label>
+      </div>
+    </div>
+    <div class="btn-toolbar" role="toolbar" aria-label="Save button">
+      <div class="btn-group mr-2" role="group" aria-label="Save group">
+        <button type="submit" class="btn btn-outline-success" [disabled]="!taskForm.form.valid">
+          Сохранить
+        </button>
+      </div>
+      <div class="btn-group mr-2" role="group" aria-label="Delete group" (click)="onDelete(task._id)" *ngIf="task._id">
+        <button type="button" class="btn btn-danger">Удалить</button>
+      </div>
+
+      <div class="btn-group ml-auto" role="group" aria-label="Close group" (click)="onEditClose()">
+        <button type="button" class="btn btn-outline-primary">Закрыть</button>
+      </div>
+    </div>
+  </form>
+</div>
