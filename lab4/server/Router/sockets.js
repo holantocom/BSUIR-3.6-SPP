@@ -9,6 +9,8 @@ const uploadsDirectory = path.join(
   "uploads"
 );
 
+users = {};
+
 module.exports = io => {
   io.use(
     socketJwt.authorize({
@@ -21,7 +23,14 @@ module.exports = io => {
     const userId = socket.decoded_token.id;
     const taskService = new TaskService();
 
-    console.log(`New user: ${userId}`);
+    console.log(`New user: ${userId} - ${socket.id}`);
+
+    if(users[userId]){
+      users[userId][socket.id] = socket;
+    } else {
+      users[userId] = {};
+      users[userId][socket.id] = socket;
+    }
 
     // Get all tasks
     socket.on("tasks", async () => {
@@ -51,6 +60,11 @@ module.exports = io => {
       data.task.user = userId;
       let task = await taskService.addTask(data.task);
       socket.emit("create", task);
+
+      for(var con in users[userId]) {
+        users[userId][con].emit("taskUpdate", undefined);
+      }
+      
     });
 
     // Update task
@@ -72,6 +86,12 @@ module.exports = io => {
         data.task.user = userId;
         let task = await taskService.updateTask(data.task);
         socket.emit("update", task);
+
+        for(var con in users[userId]) {
+          users[userId][con].emit("taskUpdate", undefined);
+        }
+
+
       } else {
         socket.emit("update", undefined);
       }
@@ -85,18 +105,33 @@ module.exports = io => {
       } catch {
         socket.emit("delete", false);
       }
+
+      for(var con in users[userId]) {
+        users[userId][con].emit("taskUpdate", undefined);
+      }
+
     });
 
     // Set task status
     socket.on("status", async statusData => {
       await taskService.setTaskStatus(statusData.id, statusData.status, userId);
       socket.emit("status", true);
+
+      for(var con in users[userId]) {
+        users[userId][con].emit("taskUpdate", undefined);
+      }
+
     });
 
     // Delete attached file
     socket.on("deletefile", async id => {
       await taskService.deleteFile(id, userId);
       socket.emit("deletefile", true);
+
+      for(var con in users[userId]) {
+        users[userId][con].emit("taskUpdate", undefined);
+      }
+
     });
 
     // Download file
@@ -107,7 +142,10 @@ module.exports = io => {
     });
 
     socket.on("disconnect", () => {
-      console.log(`User close: ${userId}`);
+
+      console.log(`User close: ${userId} - ${socket.id}`);
+      delete users[userId][socket.id];
+
     })
   });
 };

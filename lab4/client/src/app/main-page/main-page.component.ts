@@ -48,6 +48,9 @@ export class MainPageComponent implements OnInit {
     this.editPanel = false;
     this.lastColumn = '';
     this.direction = 'asc';
+    this.taskService.getValue().subscribe((value) => {
+      this.getTasks();
+    });
   }
 
   onDelete(taskId: string) {

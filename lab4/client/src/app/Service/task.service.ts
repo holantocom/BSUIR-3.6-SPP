@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { environment } from "src/environments/environment";
-import { Observable } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { Task } from "../Model/task";
 import * as io from "socket.io-client";
 import { UserService } from "./user.service";
@@ -11,6 +11,7 @@ import { UserService } from "./user.service";
 export class TaskService implements OnDestroy {
   private socket: SocketIOClient.Socket;
   private socketPath = "/socket/tasks";
+  private needUpdate: BehaviorSubject<boolean>;
 
   constructor() {
     this.socket = io(environment.apiUrl, {
@@ -19,6 +20,16 @@ export class TaskService implements OnDestroy {
         token: UserService.token
       }
     });
+    this.needUpdate = new BehaviorSubject<boolean>(false);
+    this.socket.on("taskUpdate", () => this.setValue());
+  }
+
+  getValue(): Observable<boolean> {
+    return this.needUpdate.asObservable();
+  }
+
+  setValue(): void {
+    this.needUpdate.next(true);
   }
 
   ngOnDestroy(): void {
