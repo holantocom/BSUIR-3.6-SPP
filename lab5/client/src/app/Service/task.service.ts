@@ -12,6 +12,16 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 })
 export class TaskService {
     private url = environment.apiUrl + "api/tasks/";
+    private fragment = `
+        fragment userTask on Task {
+            _id
+            title
+            completed
+            dueDate
+            fileName
+            realFileName
+          }
+    `
 
     constructor(private apollo: Apollo, private http: HttpClient) {}
 
@@ -22,14 +32,7 @@ export class TaskService {
           ...userTask
         }
       }
-      fragment userTask on Task {
-        _id
-        title
-        completed
-        dueDate
-        fileName
-        realFileName
-      }
+      ${this.fragment}
     `;
 
         return this.apollo
@@ -48,14 +51,7 @@ export class TaskService {
           ...userTask
         }
       }
-      fragment userTask on Task {
-        _id
-        title
-        completed
-        dueDate
-        fileName
-        realFileName
-      }
+      ${this.fragment}
     `;
 
         return this.apollo
@@ -75,14 +71,7 @@ export class TaskService {
           ...userTask
         }
       }
-      fragment userTask on Task {
-        _id
-        title
-        completed
-        dueDate
-        fileName
-        realFileName
-      }
+      ${this.fragment}
     `;
 
         task._id = "";
@@ -107,14 +96,7 @@ export class TaskService {
           ...userTask
         }
       }
-      fragment userTask on Task {
-        _id
-        title
-        completed
-        dueDate
-        fileName
-        realFileName
-      }
+      ${this.fragment}
     `;
 
         return this.apollo
